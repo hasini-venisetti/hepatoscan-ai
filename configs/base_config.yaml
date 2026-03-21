@@ -1,0 +1,51 @@
+model:
+  img_size: [96, 96, 96]
+  in_channels: 3
+  out_channels: 2
+  feature_size: 48
+  use_checkpoint: true
+  pretrained: true
+  pretrained_path: "swin_unetr.pt"
+
+data:
+  voxel_spacing: [1.5, 1.5, 1.5]
+  hu_min: -100
+  hu_max: 400
+  patch_size: [96, 96, 96]
+  num_samples: 4
+  cache_rate: 0.1
+  train_split: 0.70
+  val_split: 0.15
+  test_split: 0.15
+
+training:
+  batch_size: 1
+  max_epochs: 300
+  learning_rate: 1.0e-4
+  min_lr: 1.0e-6
+  warmup_epochs: 10
+  early_stopping_patience: 30
+  save_every_n_epochs: 5
+  mixed_precision: true
+  gradient_clip: 1.0
+
+loss:
+  use_uncertainty_weighting: true
+  initial_sigma: [1.0, 1.0, 1.0]
+
+augmentation:
+  rand_flip_prob: 0.5
+  rand_rotate_prob: 0.3
+  rand_noise_std: 0.01
+  rand_bias_field: true
+  rand_gibbs_noise: true
+  rand_scale_intensity: true
+
+evaluation:
+  metrics: [dice, hd95, auc, f1, staging_accuracy]
+  external_val_dataset: "ircadb"
+
+wandb:
+  project: "hepatoscan-ai"
+  entity: "your_username"
+  log_every_n_steps: 10

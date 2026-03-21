@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HepatoScan AI — Clinical Report</title>
+    <style>
+        :root {
+            --primary: #1a5276;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --bg: #fafafa;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            color: #333;
+            background: var(--bg);
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), #2e86c1);
+            color: white;
+            padding: 30px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8em; margin-bottom: 5px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .content { background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 25px 0; }
+        .section h2 { color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 15px; }
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .metric-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary); }
+        .metric-card .label { font-size: 0.85em; color: #666; text-transform: uppercase; }
+        .metric-card .value { font-size: 1.3em; font-weight: bold; color: var(--primary); }
+        .warning-box { background: #fcf3cf; border-left: 4px solid var(--warning); padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
+        .danger-box { background: #fadbd8; border-left: 4px solid var(--danger); padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
+        .success-box { background: #d5f5e3; border-left: 4px solid var(--success); padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
+        .disclaimer { background: #f8d7da; border: 1px solid #f5c6cb; padding: 20px; margin-top: 30px; border-radius: 8px; font-size: 0.9em; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: var(--primary); font-weight: 600; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
+        .badge-danger { background: var(--danger); color: white; }
+        .badge-success { background: var(--success); color: white; }
+        .badge-warning { background: var(--warning); color: white; }
+        @media print { body { margin: 0; } .header { border-radius: 0; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏥 HepatoScan AI</h1>
+        <p>Automated Liver Lesion Diagnostic Report</p>
+    </div>
+    <div class="content">
+        <div class="section">
+            <h2>📋 Patient Information</h2>
+            <div class="metric-grid">
+                <div class="metric-card"><div class="label">Patient ID</div><div class="value">{{ patient_id }}</div></div>
+                <div class="metric-card"><div class="label">Scan Date</div><div class="value">{{ scan_date }}</div></div>
+                <div class="metric-card"><div class="label">Analysis Date</div><div class="value">{{ analysis_date }}</div></div>
+                <div class="metric-card"><div class="label">Report ID</div><div class="value">{{ report_id }}</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>🔍 Findings</h2>
+            <div class="metric-grid">
+                <div class="metric-card"><div class="label">Lesions Detected</div><div class="value">{{ lesion_count }}</div></div>
+                <div class="metric-card"><div class="label">Largest Lesion</div><div class="value">{{ max_diameter }} cm</div></div>
+                <div class="metric-card"><div class="label">Total Tumor Volume</div><div class="value">{{ total_volume }} cc</div></div>
+                <div class="metric-card"><div class="label">Liver Volume</div><div class="value">{{ liver_volume }} cc</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>📊 Classification</h2>
+            <div class="metric-grid">
+                <div class="metric-card"><div class="label">Malignancy</div><div class="value">{{ malignancy }} <span class="badge {{ 'badge-danger' if malignancy == 'Malignant' else 'badge-success' }}">{{ confidence }}%</span></div></div>
+                <div class="metric-card"><div class="label">Lesion Type</div><div class="value">{{ cancer_type }}</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>🎯 BCLC Staging</h2>
+            <div class="metric-card" style="border-left-color: var(--warning);">
+                <div class="label">Stage</div>
+                <div class="value">{{ bclc_stage }}</div>
+            </div>
+            <div class="success-box">
+                <strong>💊 Recommended Treatment:</strong><br>
+                {{ treatment }}
+            </div>
+        </div>
+        <div class="disclaimer">
+            <strong>⚠️ DISCLAIMER:</strong> This report is AI-generated for research purposes only.
+            Clinical decisions must be validated by a qualified radiologist.
+            This system is NOT approved by any regulatory authority.
+        </div>
+    </div>
+</body>
+</html>

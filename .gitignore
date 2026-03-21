@@ -1,0 +1,39 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Model weights (too large for GitHub)
+*.pt
+*.pth
+*.ckpt
+
+# Data folders (too large)
+data/raw/
+data/processed/
+data/splits/
+
+# Experiment tracking
+wandb/
+
+# Environment variables
+.env
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Outputs
+evaluation_results/figures/

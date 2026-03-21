@@ -1,0 +1,51 @@
+# Multi-task config — inherits from base_config.yaml
+# Usage: OmegaConf.merge(base_cfg, multitask_cfg)
+
+model:
+  out_channels: 2
+  num_classes_binary: 2
+  num_classes_malignant: 4
+  num_classes_benign: 4
+  num_bclc_stages: 5
+  mc_dropout_samples: 20
+  dropout_rate: 0.4
+
+training:
+  max_epochs: 50
+  learning_rate: 1.0e-5
+  min_lr: 1.0e-7
+  warmup_epochs: 5
+  early_stopping_patience: 15
+
+loss:
+  use_uncertainty_weighting: true
+  initial_sigma: [1.0, 1.0, 1.0]
+  focal_loss_gamma: 2.0
+  focal_loss_alpha: 0.25
+  staging_class_weights: [1.0, 1.0, 1.0, 3.0, 3.0]  # upweight Stage C, D
+
+data:
+  datasets:
+    - name: "hcc_tace"
+      path: "data/raw/hcc_tace"
+      tasks: ["segmentation", "classification", "staging"]
+    - name: "lits"
+      path: "data/raw/lits"
+      tasks: ["segmentation"]
+    - name: "ircadb"
+      path: "data/raw/ircadb"
+      tasks: ["segmentation", "classification"]
+    - name: "decathlon"
+      path: "data/raw/decathlon"
+      tasks: ["segmentation"]
+
+classification:
+  class_names_binary: ["benign", "malignant"]
+  class_names_malignant: ["HCC", "ICC", "Colorectal Metastasis", "Other"]
+  class_names_benign: ["Hemangioma", "Cyst", "FNH", "Adenoma"]
+
+staging:
+  bclc_stages: ["Stage 0", "Stage A", "Stage B", "Stage C", "Stage D"]
+  imaging_feature_dim: 5
+  radiomics_feature_dim: 93
+  clinical_feature_dim: 2

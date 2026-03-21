@@ -1,0 +1,36 @@
+# Segmentation-specific config — inherits from base_config.yaml
+# Usage: OmegaConf.merge(base_cfg, seg_cfg)
+
+model:
+  out_channels: 3  # background, liver, tumor
+
+training:
+  max_epochs: 300
+  learning_rate: 1.0e-4
+  min_lr: 1.0e-6
+  warmup_epochs: 10
+  early_stopping_patience: 30
+
+loss:
+  type: "dice_ce"
+  dice_weight: 0.5
+  ce_weight: 0.5
+  include_background: false
+
+data:
+  datasets:
+    - name: "lits"
+      path: "data/raw/lits"
+      format: "nifti"
+    - name: "decathlon"
+      path: "data/raw/decathlon"
+      format: "nifti"
+    - name: "hcc_tace"
+      path: "data/raw/hcc_tace"
+      format: "dicom"
+  num_samples: 4
+  pos_sample_ratio: 0.5
+
+targets:
+  liver_dice: 0.95
+  tumor_dice: 0.65
