@@ -19,7 +19,7 @@ from typing import Any, Optional
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 
 from src.training.scheduler import CosineAnnealingWarmup, build_scheduler
@@ -87,7 +87,7 @@ class BaseTrainer:
         self.scheduler = build_scheduler(optimizer, config)
 
         # Mixed precision
-        self.scaler = GradScaler(enabled=self.use_amp)
+        self.scaler = GradScaler("cuda", enabled=self.use_amp)
 
         # Checkpoint directory
         self.checkpoint_dir = DEFAULT_CHECKPOINT_DIR
@@ -191,7 +191,7 @@ class BaseTrainer:
 
         self.optimizer.zero_grad()
 
-        with autocast(enabled=self.use_amp):
+        with autocast("cuda", enabled=self.use_amp):
             outputs = self.model(images)
             if isinstance(outputs, dict):
                 seg_logits = outputs.get("seg_logits", outputs)
@@ -264,7 +264,7 @@ class BaseTrainer:
             images = batch_data["image"].to(self.device)
             labels = batch_data["label"].to(self.device)
 
-            with autocast(enabled=self.use_amp):
+            with autocast("cuda", enabled=self.use_amp):
                 outputs = self.model(images)
                 if isinstance(outputs, dict):
                     seg_logits = outputs.get("seg_logits", outputs)
