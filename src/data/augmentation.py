@@ -18,6 +18,7 @@ from monai.transforms import (
     RandRotate90d,
     RandScaleIntensityd,
     RandShiftIntensityd,
+    SpatialPadd,
     Spacingd,
 )
 
@@ -46,7 +47,17 @@ def get_train_transforms(config: dict) -> Any:
             mode=("bilinear", "nearest"),
         ),
         NormalizeIntensityd(keys=["image"], nonzero=True, channel_wise=True),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        CropForegroundd(
+            keys=["image", "label"],
+            source_key="image",
+            allow_smaller=True,
+        ),
+        # Pad volumes smaller than patch size BEFORE cropping
+        SpatialPadd(
+            keys=["image", "label"],
+            spatial_size=patch_size,
+            mode="constant",
+        ),
         RandCropByPosNegLabeld(
             keys=["image", "label"],
             label_key="label",
@@ -56,6 +67,7 @@ def get_train_transforms(config: dict) -> Any:
             num_samples=num_samples,
             image_key="image",
             image_threshold=0,
+            allow_smaller=False,
         ),
         RandFlipd(keys=["image", "label"], prob=flip_prob, spatial_axis=0),
         RandFlipd(keys=["image", "label"], prob=flip_prob, spatial_axis=1),
@@ -75,6 +87,7 @@ def get_train_transforms(config: dict) -> Any:
 def get_val_transforms(config: dict) -> Any:
     data_cfg      = config.get("data", {})
     voxel_spacing = data_cfg.get("voxel_spacing", [1.5, 1.5, 1.5])
+    patch_size    = data_cfg.get("patch_size", [96, 96, 96])
 
     return Compose([
         LoadImaged(keys=["image", "label"]),
@@ -86,7 +99,16 @@ def get_val_transforms(config: dict) -> Any:
             mode=("bilinear", "nearest"),
         ),
         NormalizeIntensityd(keys=["image"], nonzero=True, channel_wise=True),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        CropForegroundd(
+            keys=["image", "label"],
+            source_key="image",
+            allow_smaller=True,
+        ),
+        SpatialPadd(
+            keys=["image", "label"],
+            spatial_size=patch_size,
+            mode="constant",
+        ),
         EnsureTyped(keys=["image", "label"]),
     ])
 
@@ -94,6 +116,7 @@ def get_val_transforms(config: dict) -> Any:
 def get_inference_transforms(config: dict) -> Any:
     data_cfg      = config.get("data", {})
     voxel_spacing = data_cfg.get("voxel_spacing", [1.5, 1.5, 1.5])
+    patch_size    = data_cfg.get("patch_size", [96, 96, 96])
 
     return Compose([
         LoadImaged(keys=["image"]),
@@ -101,6 +124,7 @@ def get_inference_transforms(config: dict) -> Any:
         Orientationd(keys=["image"], axcodes="RAS"),
         Spacingd(keys=["image"], pixdim=voxel_spacing, mode="bilinear"),
         NormalizeIntensityd(keys=["image"], nonzero=True, channel_wise=True),
-        CropForegroundd(keys=["image"], source_key="image"),
+        CropForegroundd(keys=["image"], source_key="image", allow_smaller=True),
+        SpatialPadd(keys=["image"], spatial_size=patch_size, mode="constant"),
         EnsureTyped(keys=["image"]),
     ])
