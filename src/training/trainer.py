@@ -23,6 +23,7 @@ from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 
 from src.training.scheduler import CosineAnnealingWarmup, build_scheduler
+from monai.inferers import sliding_window_inference
 from src.utils.checkpoint import save_checkpoint, load_checkpoint
 
 # ---------------------------------------------------------------------------
@@ -243,29 +244,25 @@ class BaseTrainer:
         val_loader: DataLoader,
         epoch: int,
     ) -> dict[str, float]:
-        """Run validation.
-
-        Parameters
-        ----------
-        val_loader : DataLoader
-            Validation data loader.
-        epoch : int
-            Current epoch index.
-
-        Returns
-        -------
-        dict[str, float]
-            Validation metrics.
-        """
+        """Run validation using sliding window inference."""
         self.model.eval()
         val_losses = []
+        patch_size = self.config.get("data", {}).get("patch_size", [96, 96, 96])
 
         for batch_data in val_loader:
             images = batch_data["image"].to(self.device)
             labels = batch_data["label"].to(self.device)
 
             with autocast("cuda", enabled=self.use_amp):
-                outputs = self.model(images)
+                # Use sliding window inference — handles any volume size
+                outputs = sliding_window_inference(
+                    inputs=images,
+                    roi_size=patch_size,
+                    sw_batch_size=2,
+                    predictor=self.model,
+                    overlap=0.5,
+                )
+
                 if isinstance(outputs, dict):
                     seg_logits = outputs.get("seg_logits", outputs)
                 else:
